@@ -2,7 +2,7 @@
 
 ## Fonctionnalités
 
-Ce module est conçu pour les autoentrepreneurs.
+Ce module est conçu pour les autoentrepreneurs et en particulier ceux sous le régime BIC qui ont une obligation de déclarer à l'URSSAF séparément le chiffre d'affaire des prestations de service commerciales ou artisanales et la vente de marchandise.
 
 Pour les autoentrepreneurs sous le régime BIC, ce module permet d'analyser et de répartir les règlements selon la nature de l'activité exercée pour chaque ligne de chaque facture saisie et réglée. Il collecte automatiquement dans l'ensemble des règlements la part correspondant aux prestations de services (commerciales ou artisanales) et celle correspondant à la vente de marchandise (négoce). Cette distinction est essentielle pour calculer avec précision le montant des charges URSSAF et correctement renseigner votre déclaration de chiffre d'affaire, car les taux de cotisation diffèrent selon la nature de l'activité.
 
