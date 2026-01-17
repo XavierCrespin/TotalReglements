@@ -13,6 +13,25 @@ Une option a été ajoutée pour, permettre aux prestataires de service sous le 
 
 D'autres modules externes sont disponibles sur [Dolistore.com](https://www.dolistore.com).
 
+## 🔧 Compatibilité
+
+### Versions Dolibarr supportées
+
+- **Compatible :** Dolibarr **16.0** à **22.0+**
+- **Testé et validé :** Dolibarr **18.0** à **22.0**
+- **Compatibilité future :** Le module devrait fonctionner avec les versions ultérieures (23.0+) car il utilise uniquement des fonctions standard de l'API Dolibarr
+
+### Prérequis techniques
+
+- **PHP :** Version 7.1 ou supérieure
+- **Dolibarr :** Version minimale 16.0
+- **Base de données :** MySQL/MariaDB ou PostgreSQL (toutes versions compatibles avec Dolibarr)
+
+### Notes de compatibilité
+
+- Pour Dolibarr < 16.0 : Des adaptations du code seraient nécessaires
+- Le module utilise les tables standard de Dolibarr (paiements, factures) qui restent stables entre les versions
+
 ## ⚠️ Avertissement et limitation de responsabilité
 
 **CE MODULE EST FOURNI "EN L'ÉTAT", SANS GARANTIE D'AUCUNE SORTE.**
