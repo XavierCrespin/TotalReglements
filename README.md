@@ -1,61 +1,61 @@
-# TOTALREGLEMENTS FOR [DOLIBARR ERP & CRM](https://www.dolibarr.org)
+# TOTALREGLEMENTS POUR [DOLIBARR ERP & CRM](https://www.dolibarr.org)
 
-## Features
+## Fonctionnalités
 
-Description of the module...
+Ce module permet de calculer le montant des charges URSSAF et de faire la différence entre les règlements des prestations de services commerciales ou artisanales et le négoce.
 
 <!--
-![Screenshot totalreglements](img/screenshot_totalreglements.png?raw=true "TotalReglements"){imgmd}
+![Capture d'écran totalreglements](img/screenshot_totalreglements.png?raw=true "TotalReglements"){imgmd}
 -->
 
-Other external modules are available on [Dolistore.com](https://www.dolistore.com).
+D'autres modules externes sont disponibles sur [Dolistore.com](https://www.dolistore.com).
 
-## Translations
+## Traductions
 
-Translations can be completed manually by editing files in the module directories under `langs`.
+Les traductions peuvent être complétées manuellement en éditant les fichiers dans les répertoires du module sous `langs`.
 
 <!--
-This module contains also a sample configuration for Transifex, under the hidden directory [.tx](.tx), so it is possible to manage translation using this service.
+Ce module contient également un exemple de configuration pour Transifex, dans le répertoire caché [.tx](.tx), il est donc possible de gérer la traduction en utilisant ce service.
 
-For more information, see the [translator's documentation](https://wiki.dolibarr.org/index.php/Translator_documentation).
+Pour plus d'informations, consultez la [documentation du traducteur](https://wiki.dolibarr.org/index.php/Translator_documentation).
 
-There is a [Transifex project](https://transifex.com/projects/p/dolibarr-module-template) for this module.
+Il existe un [projet Transifex](https://transifex.com/projects/p/dolibarr-module-template) pour ce module.
 -->
 
 
 ## Installation
 
-Prerequisites: You must have Dolibarr ERP & CRM software installed. You can download it from [Dolistore.org](https://www.dolibarr.org).
-You can also get a ready-to-use instance in the cloud from https://saas.dolibarr.org
+Prérequis : Vous devez avoir le logiciel Dolibarr ERP & CRM installé. Vous pouvez le télécharger depuis [Dolistore.org](https://www.dolibarr.org).
+Vous pouvez également obtenir une instance prête à l'emploi dans le cloud sur https://saas.dolibarr.org
 
 
-### From the ZIP file and GUI interface
+### Depuis le fichier ZIP et l'interface graphique
 
-If the module is a ready-to-deploy zip file, so with a name `module_xxx-version.zip` (e.g., when downloading it from a marketplace like [Dolistore](https://www.dolistore.com)),
-go to menu `Home> Setup> Modules> Deploy external module` and upload the zip file.
+Si le module est un fichier zip prêt à être déployé, avec un nom `module_xxx-version.zip` (par exemple, lors du téléchargement depuis une marketplace comme [Dolistore](https://www.dolistore.com)),
+allez dans le menu `Accueil > Configuration > Modules > Déployer un module externe` et téléchargez le fichier zip.
 
-Note: If this screen tells you that there is no "custom" directory, check that your setup is correct:
+Note : Si cet écran vous indique qu'il n'y a pas de répertoire "custom", vérifiez que votre configuration est correcte :
 
 <!--
 
-- In your Dolibarr installation directory, edit the `htdocs/conf/conf.php` file and check that following lines are not commented:
+- Dans le répertoire d'installation de Dolibarr, éditez le fichier `htdocs/conf/conf.php` et vérifiez que les lignes suivantes ne sont pas commentées :
 
     ```php
     //$dolibarr_main_url_root_alt ...
     //$dolibarr_main_document_root_alt ...
     ```
 
-- Uncomment them if necessary (delete the leading `//`) and assign the proper value according to your Dolibarr installation
+- Décommentez-les si nécessaire (supprimez le `//` au début) et attribuez la valeur appropriée selon votre installation Dolibarr
 
-    For example :
+    Par exemple :
 
-    - UNIX:
+    - UNIX :
         ```php
         $dolibarr_main_url_root_alt = '/custom';
         $dolibarr_main_document_root_alt = '/var/www/Dolibarr/htdocs/custom';
         ```
 
-    - Windows:
+    - Windows :
         ```php
         $dolibarr_main_url_root_alt = '/custom';
         $dolibarr_main_document_root_alt = 'C:/My Web Sites/Dolibarr/htdocs/custom';
@@ -64,9 +64,9 @@ Note: If this screen tells you that there is no "custom" directory, check that y
 
 <!--
 
-### From a GIT repository
+### Depuis un dépôt GIT
 
-Clone the repository in `$dolibarr_main_document_root_alt/totalreglements`
+Clonez le dépôt dans `$dolibarr_main_document_root_alt/totalreglements`
 
 ```shell
 cd ....../custom
@@ -75,22 +75,22 @@ git clone git@github.com:gitlogin/totalreglements.git totalreglements
 
 -->
 
-### Final steps
+### Étapes finales
 
-Using your browser:
+En utilisant votre navigateur :
 
-  - Log into Dolibarr as a super-administrator
-  - Go to "Setup"> "Modules"
-  - You should now be able to find and enable the module
+  - Connectez-vous à Dolibarr en tant que super-administrateur
+  - Allez dans "Configuration" > "Modules"
+  - Vous devriez maintenant pouvoir trouver et activer le module
 
 
 
-## Licenses
+## Licences
 
-### Main code
+### Code principal
 
-GPLv3 or (at your option) any later version. See file COPYING for more information.
+GPLv3 ou (à votre choix) toute version ultérieure. Voir le fichier COPYING pour plus d'informations.
 
 ### Documentation
 
-All texts and readme's are licensed under [GFDL](https://www.gnu.org/licenses/fdl-1.3.en.html).
+Tous les textes et readme sont sous licence [GFDL](https://www.gnu.org/licenses/fdl-1.3.en.html).
