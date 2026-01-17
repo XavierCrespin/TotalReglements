@@ -218,7 +218,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             echo '<p><em>Les taxes CCI ne s\'appliquent pas en régime BNC</em></p>';
         }
 
-		echo '⚠️ <strong>Attention</strong> : vous devez saisir dans votre déclaration URSSAF uniquement les montants affichés dans la colonne « Total CA à déclarer », la colonne « Montant des charges » est une estimation du montant des charges à payer.';
+		echo '<div class="info" style="margin: 15px 0;">';
+		echo img_warning() . ' <strong>Information importante</strong> : Vous devez saisir dans votre déclaration URSSAF uniquement les montants affichés dans la colonne « Total CA à déclarer ». La colonne « Montant des charges » est une estimation du montant des charges à payer.';
+		echo '</div>';
         
         echo '<h3>Résultats :</h3>';
         echo '<table class="noborder">
