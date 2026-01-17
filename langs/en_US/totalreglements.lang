@@ -1,0 +1,42 @@
+# Translation file
+
+#
+# Generic
+#
+
+# Module label 'ModuleTotalReglementsName'
+ModuleTotalReglementsName = TotalReglements
+# Module description 'ModuleTotalReglementsDesc'
+ModuleTotalReglementsDesc = TotalReglements description
+
+#
+# Admin page
+#
+TotalReglementsSetup = TotalReglements setup
+Settings = Settings
+TotalReglementsSetupPage = TotalReglements setup page
+NewSection=New section
+TOTALREGLEMENTS_MYPARAM1 = My param 1
+TOTALREGLEMENTS_MYPARAM1Tooltip = My param 1 tooltip
+TOTALREGLEMENTS_MYPARAM2=My param 2
+TOTALREGLEMENTS_MYPARAM2Tooltip=My param 2 tooltip
+
+
+#
+# About page
+#
+About = About
+TotalReglementsAbout = About TotalReglements
+TotalReglementsAboutPage = TotalReglements about page
+
+#
+# Sample page
+#
+TotalReglementsArea = Home TotalReglements
+MyPageName = My page name
+
+#
+# Sample widget
+#
+MyWidget = My widget
+MyWidgetDescription = My widget description
