@@ -2,13 +2,34 @@
 
 ## Fonctionnalités
 
-Ce module permet de calculer le montant des charges URSSAF et de faire la différence entre les règlements des prestations de services commerciales ou artisanales et le négoce.
+Ce module permet d'analyser et de répartir les règlements selon la nature de l'activité exercée. Pour les autoentrepreneurs sous le régime BIC, il collecte automatiquement dans l'ensemble des règlements la part correspondant aux prestations de services (commerciales ou artisanales) et celle correspondant à la vente de marchandise (négoce). Cette distinction est essentielle pour calculer avec précision le montant des charges URSSAF et correctement renseigner votre déclaration de chiffre d'affaire, car les taux de cotisation diffèrent selon la nature de l'activité.
+Une option a été ajoutée pour, permettre aux prestataires de service sous le régime BNC de calculer également le montant de leurs charges, et le CA à déclarer par trimestre ou mensuel.
 
 <!--
 ![Capture d'écran totalreglements](img/screenshot_totalreglements.png?raw=true "TotalReglements"){imgmd}
 -->
 
 D'autres modules externes sont disponibles sur [Dolistore.com](https://www.dolistore.com).
+
+## ⚠️ Avertissement et limitation de responsabilité
+
+**CE MODULE EST FOURNI "EN L'ÉTAT", SANS GARANTIE D'AUCUNE SORTE.**
+
+L'utilisation de ce module se fait sous votre entière responsabilité. L'auteur ne saurait être tenu responsable de toute erreur, inexactitude ou omission dans les calculs effectués par ce module, ni de leurs conséquences.
+
+**Il est de votre responsabilité de :**
+- Vérifier l'exactitude des calculs et des montants générés par le module
+- Vous assurer de la conformité avec la réglementation fiscale et sociale en vigueur
+- Contrôler vos déclarations avant de les transmettre aux organismes compétents (URSSAF, etc.)
+- Consulter un expert-comptable ou un professionnel qualifié en cas de doute
+
+**L'auteur décline toute responsabilité en cas de :**
+- Erreurs dans les calculs de charges URSSAF ou de chiffre d'affaires
+- Déclarations fiscales ou sociales incorrectes
+- Pénalités, majorations ou redressements liés à l'utilisation du module
+- Tout dommage direct ou indirect résultant de l'utilisation ou de l'impossibilité d'utiliser ce module
+
+Chaque utilisateur reste seul responsable de ses obligations déclaratives et de la tenue de sa comptabilité conformément aux dispositions légales et réglementaires applicables.
 
 ## Traductions
 
