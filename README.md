@@ -10,7 +10,7 @@ Pour les autoentrepreneurs sous le régime BNC il calcule également le montant 
 
 Le module peut calculer ces montants sur une base trimestrielle ou mensuelle.
 
-Pour que le calcul soit juste et conforme avec vos obligations, vous devez saisir tous les reglements de vos factures en temps et en heure dans votre interface Dolibarr.
+Pour que le calcul soit juste et conforme à vos obligations, vous devez saisir tous les reglements de vos factures en temps et en heure dans votre interface Dolibarr.
 
 <!--
 ![Capture d'écran totalreglements](img/screenshot_totalreglements.png?raw=true "TotalReglements"){imgmd}
