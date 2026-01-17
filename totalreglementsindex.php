@@ -10,11 +10,49 @@ $langs->load("totalreglements@totalreglements");
 
 llxHeader('', 'Total des règlements');
 
+$annee_actuelle = date('Y');
+
 echo '<form method="POST" action="">
-        <label for="date_debut">Date début :</label>
-        <input type="date" name="date_debut" value="'.(isset($_POST['date_debut']) ? $_POST['date_debut'] : '').'" required>
-        <label for="date_fin">Date fin :</label>
-        <input type="date" name="date_fin" value="'.(isset($_POST['date_fin']) ? $_POST['date_fin'] : '').'" required>
+        <label for="periodicite">Périodicité :</label>
+        <select name="periodicite" id="periodicite" required>
+            <option value="trimestriel" '.(isset($_POST['periodicite']) && $_POST['periodicite'] == 'trimestriel' ? 'selected' : (!isset($_POST['periodicite']) ? 'selected' : '')).'>Trimestrielle</option>
+            <option value="mensuel" '.(isset($_POST['periodicite']) && $_POST['periodicite'] == 'mensuel' ? 'selected' : '').'>Mensuelle</option>
+        </select>
+        
+        <br><br>
+        
+        <div id="champs_trimestre">
+            <label for="trimestre">Trimestre :</label>
+            <select name="trimestre" id="trimestre">
+                <option value="1" '.(isset($_POST['trimestre']) && $_POST['trimestre'] == '1' ? 'selected' : '').'>1er trimestre (Jan-Mar)</option>
+                <option value="2" '.(isset($_POST['trimestre']) && $_POST['trimestre'] == '2' ? 'selected' : '').'>2ème trimestre (Avr-Juin)</option>
+                <option value="3" '.(isset($_POST['trimestre']) && $_POST['trimestre'] == '3' ? 'selected' : '').'>3ème trimestre (Juil-Sep)</option>
+                <option value="4" '.(isset($_POST['trimestre']) && $_POST['trimestre'] == '4' ? 'selected' : '').'>4ème trimestre (Oct-Déc)</option>
+            </select>
+            <br><br>
+        </div>
+        
+        <div id="champs_mois" style="display:none;">
+            <label for="mois">Mois :</label>
+            <select name="mois" id="mois">
+                <option value="1" '.(isset($_POST['mois']) && $_POST['mois'] == '1' ? 'selected' : '').'>Janvier</option>
+                <option value="2" '.(isset($_POST['mois']) && $_POST['mois'] == '2' ? 'selected' : '').'>Février</option>
+                <option value="3" '.(isset($_POST['mois']) && $_POST['mois'] == '3' ? 'selected' : '').'>Mars</option>
+                <option value="4" '.(isset($_POST['mois']) && $_POST['mois'] == '4' ? 'selected' : '').'>Avril</option>
+                <option value="5" '.(isset($_POST['mois']) && $_POST['mois'] == '5' ? 'selected' : '').'>Mai</option>
+                <option value="6" '.(isset($_POST['mois']) && $_POST['mois'] == '6' ? 'selected' : '').'>Juin</option>
+                <option value="7" '.(isset($_POST['mois']) && $_POST['mois'] == '7' ? 'selected' : '').'>Juillet</option>
+                <option value="8" '.(isset($_POST['mois']) && $_POST['mois'] == '8' ? 'selected' : '').'>Août</option>
+                <option value="9" '.(isset($_POST['mois']) && $_POST['mois'] == '9' ? 'selected' : '').'>Septembre</option>
+                <option value="10" '.(isset($_POST['mois']) && $_POST['mois'] == '10' ? 'selected' : '').'>Octobre</option>
+                <option value="11" '.(isset($_POST['mois']) && $_POST['mois'] == '11' ? 'selected' : '').'>Novembre</option>
+                <option value="12" '.(isset($_POST['mois']) && $_POST['mois'] == '12' ? 'selected' : '').'>Décembre</option>
+            </select>
+            <br><br>
+        </div>
+        
+        <label for="annee">Année :</label>
+        <input type="number" name="annee" id="annee" min="2000" max="2100" value="'.(isset($_POST['annee']) ? $_POST['annee'] : $annee_actuelle).'" required>
         
         <br><br>
         
@@ -58,36 +96,101 @@ echo '<script>
             }
         }
         
+        function togglePeriodicite() {
+            var periodicite = document.getElementById("periodicite").value;
+            var champsTrimestre = document.getElementById("champs_trimestre");
+            var champsMois = document.getElementById("champs_mois");
+            
+            if (periodicite === "mensuel") {
+                champsTrimestre.style.display = "none";
+                champsMois.style.display = "block";
+            } else {
+                champsTrimestre.style.display = "block";
+                champsMois.style.display = "none";
+            }
+        }
+        
         // Appeler au chargement de la page
         toggleChampsCI();
+        togglePeriodicite();
         
         // Appeler lors du changement de sélection
         document.getElementById("regime_fiscal").addEventListener("change", toggleChampsCI);
+        document.getElementById("periodicite").addEventListener("change", togglePeriodicite);
       </script>';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    echo '<p>Date début : ' . ($_POST['date_debut'] ?? 'Non reçue') . '</p>';
-    echo '<p>Date fin : ' . ($_POST['date_fin'] ?? 'Non reçue') . '</p>';
-
     // Désactiver temporairement la vérification du token pour test
     // if (!isset($_POST['token']) || !verifyToken($_POST['token'])) {
     //     die('<p>Token CSRF invalide</p>');
     // }
 
-    $date_debut = $db->escape($_POST['date_debut']);
-    $date_fin = $db->escape($_POST['date_fin']);
+    // Récupération de la périodicité et de l'année
+    $periodicite = $_POST['periodicite'] ?? 'trimestriel';
+    $annee = intval($_POST['annee'] ?? date('Y'));
+    
+    // Calcul des dates de début et fin selon la périodicité
+    if ($periodicite == 'mensuel') {
+        $mois = intval($_POST['mois'] ?? 1);
+        
+        // Tableau des noms de mois
+        $noms_mois = [
+            1 => 'Janvier', 2 => 'Février', 3 => 'Mars', 4 => 'Avril',
+            5 => 'Mai', 6 => 'Juin', 7 => 'Juillet', 8 => 'Août',
+            9 => 'Septembre', 10 => 'Octobre', 11 => 'Novembre', 12 => 'Décembre'
+        ];
+        
+        // Date de début : 1er jour du mois
+        $date_debut = $annee . '-' . sprintf('%02d', $mois) . '-01';
+        
+        // Date de fin : dernier jour du mois
+        $dernier_jour = date('t', strtotime($date_debut));
+        $date_fin = $annee . '-' . sprintf('%02d', $mois) . '-' . $dernier_jour;
+        
+        $libelle_periode = $noms_mois[$mois];
+        
+    } else {
+        // Mode trimestriel
+        $trimestre = intval($_POST['trimestre'] ?? 1);
+        
+        switch($trimestre) {
+            case 1:
+                $date_debut = $annee . '-01-01';
+                $date_fin = $annee . '-03-31';
+                $libelle_periode = '1er trimestre';
+                break;
+            case 2:
+                $date_debut = $annee . '-04-01';
+                $date_fin = $annee . '-06-30';
+                $libelle_periode = '2ème trimestre';
+                break;
+            case 3:
+                $date_debut = $annee . '-07-01';
+                $date_fin = $annee . '-09-30';
+                $libelle_periode = '3ème trimestre';
+                break;
+            case 4:
+                $date_debut = $annee . '-10-01';
+                $date_fin = $annee . '-12-31';
+                $libelle_periode = '4ème trimestre';
+                break;
+            default:
+                die('<p>Trimestre invalide</p>');
+        }
+    }
+    
+    echo '<p><strong>Période : ' . $libelle_periode . ' ' . $annee . '</strong></p>';
+    echo '<p>Du ' . dol_print_date(strtotime($date_debut), 'day') . ' au ' . dol_print_date(strtotime($date_fin), 'day') . '</p>';
     
     // Récupération des paramètres de calcul des charges
     $regime_fiscal = $_POST['regime_fiscal'] ?? 'BIC';
     $formation_prof = floatval($_POST['formation_prof'] ?? 0.10);
     $taxe_cci_vente = floatval($_POST['taxe_cci_vente'] ?? 0.02);
     $taxe_cci_prestation = floatval($_POST['taxe_cci_prestation'] ?? 0.04);
-
-    if (empty($date_debut) || empty($date_fin)) {
-        die('<p>Les dates ne sont pas valides ou sont vides.</p>');
-    } else {
-        echo '<p>Interval traité : ' . $date_debut . ' - ' . $date_fin . '</p>';
-    }
+    
+    // Échappement des dates pour SQL
+    $date_debut = $db->escape($date_debut);
+    $date_fin = $db->escape($date_fin);
 
     $sql = "SELECT fd.product_type, SUM(fd.total_ht) AS total
             FROM ".MAIN_DB_PREFIX."paiement p

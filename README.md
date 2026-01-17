@@ -2,6 +2,8 @@
 
 ## Fonctionnalités
 
+Ce module est conçu pour les autoentrepreneurs.
+
 Ce module permet d'analyser et de répartir les règlements selon la nature de l'activité exercée. Pour les autoentrepreneurs sous le régime BIC, il collecte automatiquement dans l'ensemble des règlements la part correspondant aux prestations de services (commerciales ou artisanales) et celle correspondant à la vente de marchandise (négoce). Cette distinction est essentielle pour calculer avec précision le montant des charges URSSAF et correctement renseigner votre déclaration de chiffre d'affaire, car les taux de cotisation diffèrent selon la nature de l'activité.
 Une option a été ajoutée pour, permettre aux prestataires de service sous le régime BNC de calculer également le montant de leurs charges, et le CA à déclarer par trimestre ou mensuel.
 
