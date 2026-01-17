@@ -136,7 +136,7 @@ En utilisant votre navigateur :
 
 ### Code principal
 
-GPLv3 ou (à votre choix) toute version ultérieure. Voir le fichier COPYING pour plus d'informations.
+GPLv3
 
 ### Documentation
 
