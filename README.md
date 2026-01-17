@@ -4,8 +4,13 @@
 
 Ce module est conçu pour les autoentrepreneurs.
 
-Ce module permet d'analyser et de répartir les règlements selon la nature de l'activité exercée. Pour les autoentrepreneurs sous le régime BIC, il collecte automatiquement dans l'ensemble des règlements la part correspondant aux prestations de services (commerciales ou artisanales) et celle correspondant à la vente de marchandise (négoce). Cette distinction est essentielle pour calculer avec précision le montant des charges URSSAF et correctement renseigner votre déclaration de chiffre d'affaire, car les taux de cotisation diffèrent selon la nature de l'activité.
-Une option a été ajoutée pour, permettre aux prestataires de service sous le régime BNC de calculer également le montant de leurs charges, et le CA à déclarer par trimestre ou mensuel.
+Pour les autoentrepreneurs sous le régime BIC, ce module permet d'analyser et de répartir les règlements selon la nature de l'activité exercée pour chaque ligne de chaque facture saisie et réglée. Il collecte automatiquement dans l'ensemble des règlements la part correspondant aux prestations de services (commerciales ou artisanales) et celle correspondant à la vente de marchandise (négoce). Cette distinction est essentielle pour calculer avec précision le montant des charges URSSAF et correctement renseigner votre déclaration de chiffre d'affaire, car les taux de cotisation diffèrent selon la nature de l'activité.
+
+Pour les autoentrepreneurs sous le régime BNC il calcule également le montant des charges URSSAF, et le CA à déclarer.
+
+Le module peut calculer ces montants sur une base trimestrielle ou mensuelle.
+
+Pour que le calcul soit juste et conforme avec vos obligations, vous devez saisir tous les reglements de vos factures en temps et en heure dans votre interface Dolibarr.
 
 <!--
 ![Capture d'écran totalreglements](img/screenshot_totalreglements.png?raw=true "TotalReglements"){imgmd}
