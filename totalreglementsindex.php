@@ -189,17 +189,114 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $taxe_cci_prestation = floatval($_POST['taxe_cci_prestation'] ?? 0.04);
     
     // Échappement des dates pour SQL
+    $date_fin_exclusive = date('Y-m-d', strtotime($date_fin . ' +1 day'));
     $date_debut = $db->escape($date_debut);
-    $date_fin = $db->escape($date_fin);
+    $date_fin_exclusive = $db->escape($date_fin_exclusive);
 
-    $sql = "SELECT fd.product_type, SUM(fd.total_ht) AS total
+    $sql = "SELECT typed_totals.product_type, SUM(typed_totals.total) AS total
+            FROM (
+                SELECT COALESCE(fd.product_type, 1) AS product_type,
+                    SUM(pf.amount * fd.total_ttc / fl.total_ttc) AS total
+                FROM ".MAIN_DB_PREFIX."paiement p
+                JOIN ".MAIN_DB_PREFIX."paiement_facture pf ON p.rowid = pf.fk_paiement
+                JOIN ".MAIN_DB_PREFIX."facture f ON pf.fk_facture = f.rowid
+                JOIN (
+                    SELECT fk_facture, SUM(total_ttc) AS total_ttc
+                    FROM ".MAIN_DB_PREFIX."facturedet
+                    GROUP BY fk_facture
+                ) fl ON fl.fk_facture = f.rowid
+                JOIN ".MAIN_DB_PREFIX."facturedet fd ON f.rowid = fd.fk_facture
+                WHERE p.datep >= '".$date_debut."'
+                AND p.datep < '".$date_fin_exclusive."'
+                AND f.entity IN (".getEntity('invoice').")
+                AND fl.total_ttc <> 0
+                GROUP BY COALESCE(fd.product_type, 1)
+
+                UNION ALL
+
+                SELECT -1 AS product_type, SUM(pf.amount) AS total
+                FROM ".MAIN_DB_PREFIX."paiement p
+                JOIN ".MAIN_DB_PREFIX."paiement_facture pf ON p.rowid = pf.fk_paiement
+                JOIN ".MAIN_DB_PREFIX."facture f ON pf.fk_facture = f.rowid
+                LEFT JOIN (
+                    SELECT fk_facture, SUM(total_ttc) AS total_ttc
+                    FROM ".MAIN_DB_PREFIX."facturedet
+                    GROUP BY fk_facture
+                ) fl ON fl.fk_facture = f.rowid
+                WHERE p.datep >= '".$date_debut."'
+                AND p.datep < '".$date_fin_exclusive."'
+                AND f.entity IN (".getEntity('invoice').")
+                AND (fl.total_ttc IS NULL OR fl.total_ttc = 0)
+            ) typed_totals
+            WHERE typed_totals.total IS NOT NULL
+            GROUP BY typed_totals.product_type";
+
+    $sql_total_paiements = "SELECT SUM(pf.amount) AS total
             FROM ".MAIN_DB_PREFIX."paiement p
             JOIN ".MAIN_DB_PREFIX."paiement_facture pf ON p.rowid = pf.fk_paiement
             JOIN ".MAIN_DB_PREFIX."facture f ON pf.fk_facture = f.rowid
-            JOIN ".MAIN_DB_PREFIX."facturedet fd ON f.rowid = fd.fk_facture
-            WHERE p.datep BETWEEN '".$date_debut."' AND '".$date_fin."'
-            AND f.paye = 1
-            GROUP BY fd.product_type";
+            WHERE p.datep >= '".$date_debut."'
+            AND p.datep < '".$date_fin_exclusive."'
+            AND f.entity IN (".getEntity('invoice').")";
+
+    $sql_rapprochement = "SELECT p.ref AS paiement_ref,
+                p.datep,
+                f.ref AS facture_ref,
+                pf.amount AS montant_reglement,
+                COALESCE(fl.total_lignes, 0) AS total_lignes,
+                f.total_ttc AS total_facture,
+                COALESCE(v.total_ventile, 0) AS total_ventile,
+                (pf.amount - COALESCE(v.total_ventile, 0)) AS ecart
+            FROM ".MAIN_DB_PREFIX."paiement p
+            JOIN ".MAIN_DB_PREFIX."paiement_facture pf ON p.rowid = pf.fk_paiement
+            JOIN ".MAIN_DB_PREFIX."facture f ON pf.fk_facture = f.rowid
+            LEFT JOIN (
+                SELECT fk_facture, SUM(total_ttc) AS total_lignes
+                FROM ".MAIN_DB_PREFIX."facturedet
+                GROUP BY fk_facture
+            ) fl ON fl.fk_facture = f.rowid
+            LEFT JOIN (
+                SELECT pf2.fk_paiement,
+                    pf2.fk_facture,
+                    SUM(CASE
+                        WHEN fl2.total_lignes IS NULL OR fl2.total_lignes = 0 THEN 0
+                        ELSE pf2.amount * fd2.total_ttc / fl2.total_lignes
+                    END) AS total_ventile
+                FROM ".MAIN_DB_PREFIX."paiement_facture pf2
+                JOIN ".MAIN_DB_PREFIX."facturedet fd2 ON fd2.fk_facture = pf2.fk_facture
+                JOIN (
+                    SELECT fk_facture, SUM(total_ttc) AS total_lignes
+                    FROM ".MAIN_DB_PREFIX."facturedet
+                    GROUP BY fk_facture
+                ) fl2 ON fl2.fk_facture = pf2.fk_facture
+                GROUP BY pf2.fk_paiement, pf2.fk_facture
+            ) v ON v.fk_paiement = p.rowid AND v.fk_facture = f.rowid
+            WHERE p.datep >= '".$date_debut."'
+            AND p.datep < '".$date_fin_exclusive."'
+            AND f.entity IN (".getEntity('invoice').")
+            HAVING ABS(ecart) > 0.005
+            ORDER BY p.datep, p.ref";
+
+    $sql_ecarts_factures = "SELECT p.ref AS paiement_ref,
+                p.datep,
+                f.ref AS facture_ref,
+                pf.amount AS montant_reglement,
+                COALESCE(fl.total_lignes, 0) AS total_lignes,
+                f.total_ttc AS total_facture,
+                (f.total_ttc - COALESCE(fl.total_lignes, 0)) AS ecart_facture
+            FROM ".MAIN_DB_PREFIX."paiement p
+            JOIN ".MAIN_DB_PREFIX."paiement_facture pf ON p.rowid = pf.fk_paiement
+            JOIN ".MAIN_DB_PREFIX."facture f ON pf.fk_facture = f.rowid
+            LEFT JOIN (
+                SELECT fk_facture, SUM(total_ttc) AS total_lignes
+                FROM ".MAIN_DB_PREFIX."facturedet
+                GROUP BY fk_facture
+            ) fl ON fl.fk_facture = f.rowid
+            WHERE p.datep >= '".$date_debut."'
+            AND p.datep < '".$date_fin_exclusive."'
+            AND f.entity IN (".getEntity('invoice').")
+            AND ABS(f.total_ttc - COALESCE(fl.total_lignes, 0)) > 0.005
+            ORDER BY p.datep, p.ref";
 
     $resql = $db->query($sql);
     if (!$resql) {
@@ -223,6 +320,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		echo '</div>';
         
         echo '<h3>Résultats :</h3>';
+
+        $total_paiements = 0;
+        $resql_total_paiements = $db->query($sql_total_paiements);
+        if ($resql_total_paiements) {
+            $obj_total_paiements = $db->fetch_object($resql_total_paiements);
+            $total_paiements = (float) $obj_total_paiements->total;
+        }
+
         echo '<table class="noborder">
                 <tr class="liste_titre">
                     <th>Type</th>
@@ -231,57 +336,89 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </tr>';
         
         $total = 0;
+        $total_ca = 0;
         $total_cci = 0;
+        $total_non_ventile = 0;
         while ($obj = $db->fetch_object($resql)) {
+			$ca_type = round((float) $obj->total, 2);
 			$charges = 0;
 			$charges_base = 0;
 			$charges_formation = 0;
 			$charges_cci = 0;
 			
-			// Calcul des charges de base
-			if($obj->product_type == 0) {
-				// Produits : toujours 12.42%
-				$charges_base = ($obj->total * 12.30) / 100;   
+			if($obj->product_type == -1) {
+				$total_non_ventile += $ca_type;
 			} else {
-				// Services : selon le régime fiscal
-				if($regime_fiscal == 'BIC') {
-					$charges_base = ($obj->total * 21.20) / 100;
-				} else {
-					$charges_base = ($obj->total * 24.60) / 100;
-				}
-			}
-			
-			// Formation professionnelle obligatoire (sur tout le CA)
-			$charges_formation = ($obj->total * $formation_prof) / 100;
-			
-			// Charges brutes (base + formation) sans les frais consulaires
-			$charges_brutes = $charges_base + $charges_formation;
-			$charges_brutes = floor($charges_brutes * 100) / 100;
-			
-			// Taxes CCI (uniquement si BIC)
-			if($regime_fiscal == 'BIC') {
+				// Calcul des charges de base
 				if($obj->product_type == 0) {
-					// Taxe CCI vente : uniquement sur les produits (product_type == 0)
-					$charges_cci += ($obj->total * $taxe_cci_vente) / 100;
+					// Produits : toujours 12.42%
+					$charges_base = ($ca_type * 12.30) / 100;   
 				} else {
-					// Taxe CCI prestation : uniquement sur les services (product_type !== 0)
-					$charges_cci += ($obj->total * $taxe_cci_prestation) / 100;
+					// Services : selon le régime fiscal
+					if($regime_fiscal == 'BIC') {
+						$charges_base = ($ca_type * 21.20) / 100;
+					} else {
+						$charges_base = ($ca_type * 24.60) / 100;
+					}
 				}
+				
+				// Formation professionnelle obligatoire (sur tout le CA)
+				$charges_formation = ($ca_type * $formation_prof) / 100;
+				
+				// Charges brutes (base + formation) sans les frais consulaires
+				$charges_brutes = $charges_base + $charges_formation;
+				$charges_brutes = floor($charges_brutes * 100) / 100;
+				
+				// Taxes CCI (uniquement si BIC)
+				if($regime_fiscal == 'BIC') {
+					if($obj->product_type == 0) {
+						// Taxe CCI vente : uniquement sur les produits (product_type == 0)
+						$charges_cci += ($ca_type * $taxe_cci_vente) / 100;
+					} else {
+						// Taxe CCI prestation : uniquement sur les services (product_type !== 0)
+						$charges_cci += ($ca_type * $taxe_cci_prestation) / 100;
+					}
+				}
+				$charges_cci = floor($charges_cci * 100) / 100;
+				
+				// Total des charges (brutes + CCI)
+				$charges = $charges_brutes + $charges_cci;
 			}
-			$charges_cci = floor($charges_cci * 100) / 100;
-			
-			// Total des charges (brutes + CCI)
-			$charges = $charges_brutes + $charges_cci;
 			
 			$total += $charges;
+			$total_ca += $ca_type;
 			$total_cci += $charges_cci;
+
+			if($obj->product_type == -1) {
+				$type_label = 'Non ventilé';
+				$charges_label = 'À classer';
+			} elseif($obj->product_type == 0) {
+				$type_label = 'Produits';
+				$charges_label = number_format($charges_brutes, 2, ',', ' ') .' €';
+			} else {
+				$type_label = 'Services';
+				$charges_label = number_format($charges_brutes, 2, ',', ' ') .' €';
+			}
 			
             echo '<tr>
-                    <td>' . ($obj->product_type == 0 ? 'Produits' : 'Services') . '</td>
-                    <td>' . price($obj->total) . ' € </td>
-                    <td>' . number_format($charges_brutes, 2, ',', ' ') .' €</td>
+                    <td>' . $type_label . '</td>
+                    <td>' . price($ca_type) . ' € </td>
+                    <td>' . $charges_label . '</td>
                   </tr>';
         }
+
+        if($total_non_ventile > 0) {
+			echo '<tr>
+					<td colspan="3" class="opacitymedium">' . img_warning() . ' ' . price($total_non_ventile) . ' € de règlements sont rattachés à des factures sans lignes ventilables. Vérifiez les factures concernées avant de déclarer les charges.</td>
+				  </tr>';
+		}
+
+		$ecart_paiements = $total_paiements - $total_ca;
+		if(abs($ecart_paiements) > 0.005) {
+			echo '<tr>
+					<td colspan="3" class="error">' . img_warning() . ' Le total ventilé ne correspond pas au total des règlements Dolibarr. Écart : ' . price($ecart_paiements) . ' €. Utilisez le total des règlements Dolibarr comme référence et vérifiez le rapprochement ci-dessous.</td>
+				  </tr>';
+		}
         
         // Ligne frais consulaires (uniquement si BIC)
         if($regime_fiscal == 'BIC') {
@@ -294,12 +431,73 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         // Ligne de total général
         echo '<tr class="liste_total">
-                <td><strong>Total général des charges à payer</strong></td>
-                <td></td>
+                <td><strong>Total général des charges à payer</strong><br><span class="opacitymedium">CA encaissé Dolibarr</span></td>
+                <td><strong>' . price($total_paiements) . ' €</strong></td>
                 <td><strong>' . number_format($total, 2, ',', ' ') .' €</strong></td>
               </tr>';
         
         echo '</table>';
+
+		echo '<p><strong>Total règlements Dolibarr :</strong> ' . price($total_paiements) . ' €</p>';
+		echo '<p><strong>Écart règlements / CA ventilé :</strong> ' . price($ecart_paiements) . ' €</p>';
+
+		$resql_ecarts_factures = $db->query($sql_ecarts_factures);
+		if($resql_ecarts_factures && $db->num_rows($resql_ecarts_factures) > 0) {
+			echo '<h3>Factures avec écart entre total facture et lignes :</h3>';
+			echo '<table class="noborder">
+					<tr class="liste_titre">
+						<th>Règlement</th>
+						<th>Date</th>
+						<th>Facture</th>
+						<th>Montant réglé</th>
+						<th>Total lignes facture</th>
+						<th>Total facture</th>
+						<th>Écart facture</th>
+					</tr>';
+			while($obj_ecart_facture = $db->fetch_object($resql_ecarts_factures)) {
+				echo '<tr>
+						<td>' . dol_escape_htmltag($obj_ecart_facture->paiement_ref) . '</td>
+						<td>' . dol_print_date($db->jdate($obj_ecart_facture->datep), 'dayhour') . '</td>
+						<td>' . dol_escape_htmltag($obj_ecart_facture->facture_ref) . '</td>
+						<td>' . price($obj_ecart_facture->montant_reglement) . ' €</td>
+						<td>' . price($obj_ecart_facture->total_lignes) . ' €</td>
+						<td>' . price($obj_ecart_facture->total_facture) . ' €</td>
+						<td>' . price($obj_ecart_facture->ecart_facture) . ' €</td>
+					  </tr>';
+			}
+			echo '</table>';
+		}
+
+		if(abs($ecart_paiements) > 0.005) {
+			$resql_rapprochement = $db->query($sql_rapprochement);
+			if($resql_rapprochement) {
+				echo '<h3>Rapprochement à vérifier :</h3>';
+				echo '<table class="noborder">
+						<tr class="liste_titre">
+							<th>Règlement</th>
+							<th>Date</th>
+							<th>Facture</th>
+							<th>Montant réglé</th>
+							<th>Total lignes facture</th>
+							<th>Total facture</th>
+							<th>Montant ventilé</th>
+							<th>Écart</th>
+						</tr>';
+				while($obj_rapprochement = $db->fetch_object($resql_rapprochement)) {
+					echo '<tr>
+							<td>' . dol_escape_htmltag($obj_rapprochement->paiement_ref) . '</td>
+							<td>' . dol_print_date($db->jdate($obj_rapprochement->datep), 'dayhour') . '</td>
+							<td>' . dol_escape_htmltag($obj_rapprochement->facture_ref) . '</td>
+							<td>' . price($obj_rapprochement->montant_reglement) . ' €</td>
+							<td>' . price($obj_rapprochement->total_lignes) . ' €</td>
+							<td>' . price($obj_rapprochement->total_facture) . ' €</td>
+							<td>' . price($obj_rapprochement->total_ventile) . ' €</td>
+							<td>' . price($obj_rapprochement->ecart) . ' €</td>
+						  </tr>';
+				}
+				echo '</table>';
+			}
+		}
 		$total = floor($total * 100) / 100;
 		$total_cci = floor($total_cci * 100) / 100;
 		
